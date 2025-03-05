@@ -63,10 +63,10 @@ void loop() {
   signalfront = digitalRead(IRfront);
   signalright = digitalRead(IRright);
   signalleft = digitalRead(IRleft);
-  Serial.println(String("Front : ") + signalfront);
-  Serial.println(String("Left : ") + signalfront);
+  //Serial.println(String("Front : ") + signalfront);
+  //Serial.println(String("Left : ") + signalfront);
   Serial.println(String("Right : ") + signalfront);
-
+  delay (100);
   if (signalfront == 1) {
     forward();
     Serial.println("forward");
@@ -89,5 +89,4 @@ void loop() {
       }
     }
   }
-}
 }
