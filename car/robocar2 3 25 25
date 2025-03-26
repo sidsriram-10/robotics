@@ -1,0 +1,85 @@
+int M1a = 5;
+int M1b = 6;
+int M2a = 11;
+int M2b = 10;
+int IRFront = A0;
+int IRLeft = A1;
+int IRRight = A2;
+int signalFront;
+int signalLeft;
+int signalRight;
+
+
+void setup() {
+  // put your setup code here, to run once:
+  pinMode(M1a, OUTPUT);
+  pinMode(M1b, OUTPUT);
+  pinMode(M2a, OUTPUT);
+  pinMode(M2b, OUTPUT);
+  pinMode(IRFront, INPUT);
+  pinMode(IRLeft, INPUT);
+  pinMode(IRRight, INPUT);
+}
+
+void forward() {
+  digitalWrite(M1a, HIGH);
+  digitalWrite(M1b, LOW);
+  digitalWrite(M2a, HIGH);
+  digitalWrite(M2b, LOW);
+}
+
+void backward() {
+  digitalWrite(M1a, LOW);
+  digitalWrite(M1b, HIGH);
+  digitalWrite(M2a, LOW);
+  digitalWrite(M2b, HIGH);
+}
+
+void turnLeft() {
+  digitalWrite(M1a, LOW);
+  digitalWrite(M2a, HIGH);
+  digitalWrite(M1b, HIGH);
+  digitalWrite(M2b, LOW);
+}
+
+void turnRight() {
+  digitalWrite(M1a, HIGH);
+  digitalWrite(M2a, LOW);
+  digitalWrite(M1b, LOW);
+  digitalWrite(M2b, HIGH);
+}
+
+void stop() {
+  digitalWrite(M1a, LOW);
+  digitalWrite(M1b, LOW);
+  digitalWrite(M2a, LOW);
+  digitalWrite(M2b, LOW);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  signalFront = digitalRead(IRFront);
+  signalLeft = digitalRead(IRLeft);
+  signalRight = digitalRead(IRRight);
+
+  Serial.println(signalFront);
+  Serial.println(signalLeft);
+  Serial.println(signalRight);
+
+
+  if(signalFront == 1) {
+    forward();
+  }
+  if (signalFront == 0) {
+    stop();
+    delay(250);
+  }
+  if(signalLeft == 0) {
+    turnRight();
+    delay(250);
+    forward();
+  }
+  if(signalRight == 0) {
+    turnLeft();
+    delay(250);  }
+  }  
