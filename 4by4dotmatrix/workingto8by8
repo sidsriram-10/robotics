@@ -1,0 +1,46 @@
+int rowPins[4] = {2, 3, 4, 5};  // Cathodes
+int colPins[4] = {6, 7, 8, 9};  // Anodes
+
+
+byte Pattern[4][4] = {
+  {0, 1, 1, 1},
+  {1, 0, 1, 1},
+  {1, 1, 0, 1},
+  {1, 1, 1, 0}
+};
+
+void setup() {
+  for (int i = 0; i < 4; i++) {
+    pinMode(rowPins[i], OUTPUT);
+    pinMode(colPins[i], OUTPUT);
+  }
+}
+
+void loop() {
+  for (int row = 0; row < 4; row++) {
+    // Turn all rows off
+    for (int r = 0; r < 4; r++) {
+      digitalWrite(rowPins[r], HIGH);
+    }
+
+    // Set columns for this row
+    for (int col = 0; col < 4; col++) {
+      if (Pattern[row][col] == 1) {
+  digitalWrite(colPins[col], HIGH);
+} else {
+  digitalWrite(colPins[col], LOW);
+}
+
+    }
+
+    // Turn on current row (active LOW)
+    digitalWrite(rowPins[row], LOW);
+
+    delay(2); // Multiplexing delay
+
+    // Turn off columns after display
+    for (int col = 0; col < 4; col++) {
+      digitalWrite(colPins[col], LOW);
+    }
+  }
+}
