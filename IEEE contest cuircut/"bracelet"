@@ -1,0 +1,41 @@
+const int soundPin = A0;   // Analog output from sound sensor (Pin A0)
+const int ledPins[] = {6, 9, 10, 11}; // PWM pins for 3 LEDs
+int soundLevel = 0;         // Variable to store the sound sensor reading
+int threshold = 48;        // Adjusted threshold value to correspond to sound levels
+
+void setup() {
+  // Initialize LED pins as OUTPUT
+  for (int i = 0; i < 4; i++) {
+    pinMode(ledPins[i], OUTPUT);
+  }
+
+  // Start serial communication for debugging
+  Serial.begin(9600);  
+}
+
+void loop() {
+  // Read the analog value from the sound sensor
+  soundLevel = analogRead(soundPin);   
+
+  // Print the raw sound level to the serial monitor (for debugging)
+  Serial.print("Sound Level: ");
+  Serial.println(soundLevel); // Check sensor output in real-time
+
+  // If the sound level is below the threshold, turn off LEDs
+  if (soundLevel < threshold) {
+    // Turn off LEDs if the sound level is too low (silence or low sound)
+    for (int i = 0; i < 4; i++) {
+      analogWrite(ledPins[i], 0);  // Turn off LEDs
+    }
+  } else {
+  // 0-1023
+  // 4 leds = 0 - 255
+  // let 700, 1st led = 255, 700-255 = 445, 2nd led = 255, 445-255 = 190, 3rd led = 190
+  for(int i = 0; i<4;i++)
+  {
+    
+  }
+  }
+
+  delay(10); // Small delay to avoid overwhelming the serial monitor
+}
