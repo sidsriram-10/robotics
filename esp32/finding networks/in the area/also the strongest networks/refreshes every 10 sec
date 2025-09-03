@@ -1,0 +1,85 @@
+#include "WiFi.h"
+#include <vector>
+#include <algorithm>
+
+struct WiFiNetwork {
+  String ssid;
+  int32_t rssi;
+  wifi_auth_mode_t encryptionType;
+};
+
+String translateEncryptionType(wifi_auth_mode_t encryptionType) {
+  switch (encryptionType) {
+    case WIFI_AUTH_OPEN: return "Open";
+    case WIFI_AUTH_WEP: return "WEP";
+    case WIFI_AUTH_WPA_PSK: return "WPA-PSK";
+    case WIFI_AUTH_WPA2_PSK: return "WPA2-PSK";
+    case WIFI_AUTH_WPA_WPA2_PSK: return "WPA/WPA2-PSK";
+    case WIFI_AUTH_WPA2_ENTERPRISE: return "WPA2-Enterprise";
+    case WIFI_AUTH_WPA3_PSK: return "WPA3-PSK";
+    case WIFI_AUTH_WPA2_WPA3_PSK: return "WPA2/WPA3-PSK";
+    default: return "Unknown";
+  }
+}
+
+void printNetworks(const std::vector<WiFiNetwork>& networks) {
+  for (const auto& net : networks) {
+    Serial.printf("SSID: %s\n", net.ssid.c_str());
+    Serial.printf("RSSI: %d dBm\n", net.rssi);
+    Serial.printf("Encryption Type: %s\n", translateEncryptionType(net.encryptionType).c_str());
+    Serial.println("-----------------------");
+  }
+}
+
+void scanAndPrintNetworks() {
+  Serial.println("Scanning WiFi networks...");
+
+  WiFi.disconnect();
+  delay(100);
+
+  int networkCount = WiFi.scanNetworks();
+
+  if (networkCount == 0) {
+    Serial.println("No networks found.\n");
+    return;
+  }
+
+  std::vector<WiFiNetwork> networks;
+
+  for (int i = 0; i < networkCount; ++i) {
+    WiFiNetwork net;
+    net.ssid = WiFi.SSID(i);
+    net.rssi = WiFi.RSSI(i);
+    net.encryptionType = WiFi.encryptionType(i);
+    networks.push_back(net);
+  }
+
+  // === Alphabetical Sort ===
+  std::vector<WiFiNetwork> alphabeticalList = networks;
+  std::sort(alphabeticalList.begin(), alphabeticalList.end(), [](const WiFiNetwork &a, const WiFiNetwork &b) {
+    return a.ssid < b.ssid;
+  });
+
+  Serial.printf("\n📶 %d networks found - Sorted by SSID (A-Z):\n\n", networkCount);
+  printNetworks(alphabeticalList);
+
+  // === Strongest Signal Sort ===
+  std::vector<WiFiNetwork> strongestList = networks;
+  std::sort(strongestList.begin(), strongestList.end(), [](const WiFiNetwork &a, const WiFiNetwork &b) {
+    return a.rssi > b.rssi; // Higher RSSI = stronger signal
+  });
+
+  Serial.printf("\n🔝 Strongest Networks (by RSSI):\n\n");
+  printNetworks(strongestList);
+}
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.mode(WIFI_STA);
+  delay(1000);
+}
+
+void loop() {
+  scanAndPrintNetworks();
+  delay(10000); // Rescan every 10 seconds
+}
