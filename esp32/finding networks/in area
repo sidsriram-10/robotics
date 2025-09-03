@@ -1,0 +1,46 @@
+#include "WiFi.h"
+
+void setup() {
+  Serial.begin(115200);
+  delay(1000);  // Allow time for Serial to start
+
+  Serial.println("Starting WiFi scan...");
+
+  // Set WiFi to station mode and disconnect from any previous connections
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  delay(100);
+
+  int networkCount = WiFi.scanNetworks();
+
+  if (networkCount == 0) {
+    Serial.println("No networks found.");
+  } else {
+    Serial.printf("%d networks found:\n\n", networkCount);
+    for (int i = 0; i < networkCount; ++i) {
+      Serial.printf("SSID: %s\n", WiFi.SSID(i).c_str());
+      Serial.printf("RSSI: %d dBm\n", WiFi.RSSI(i));
+      Serial.printf("Encryption Type: %s\n", translateEncryptionType(WiFi.encryptionType(i)));
+      Serial.println("-----------------------");
+    }
+  }
+}
+
+void loop() {
+  // Nothing here for now
+}
+
+// Helper function to translate encryption type
+String translateEncryptionType(wifi_auth_mode_t encryptionType) {
+  switch (encryptionType) {
+    case WIFI_AUTH_OPEN: return "Open";
+    case WIFI_AUTH_WEP: return "WEP";
+    case WIFI_AUTH_WPA_PSK: return "WPA-PSK";
+    case WIFI_AUTH_WPA2_PSK: return "WPA2-PSK";
+    case WIFI_AUTH_WPA_WPA2_PSK: return "WPA/WPA2-PSK";
+    case WIFI_AUTH_WPA2_ENTERPRISE: return "WPA2-Enterprise";
+    case WIFI_AUTH_WPA3_PSK: return "WPA3-PSK";
+    case WIFI_AUTH_WPA2_WPA3_PSK: return "WPA2/WPA3-PSK";
+    default: return "Unknown";
+  }
+}
