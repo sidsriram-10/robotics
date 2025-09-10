@@ -1,0 +1,75 @@
+#include <WiFi.h>
+#include <ThingSpeak.h>
+
+const char* ssid = "Aasquare";
+const char* password = "ThomasAndFriends";
+
+WiFiClient client;
+
+int channel_number = 3049058;
+const char* Api_key = "IVN86HOART9HMFUM";
+
+unsigned long idleCounter = 0;
+int loopCounter = 0;
+
+void printTableHeader() {
+  Serial.println("+----------------+---------------+-------------+");
+  Serial.println("| Free Heap (B)  | CPU Usage (%) | ThingSpeak  |");
+  Serial.println("+----------------+---------------+-------------+");
+}
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(100);
+    Serial.print(".");
+  }
+
+  Serial.println();
+  Serial.print("Connected to WiFi. IP Address: ");
+  Serial.println(WiFi.localIP());
+
+  ThingSpeak.begin(client);
+
+  // Print table header first time
+  printTableHeader();
+}
+
+void loop() {
+  // Reset counter
+  idleCounter = 0;
+  unsigned long tStart = millis();
+
+  // Run idle loop for 1 second
+  while (millis() - tStart < 1000) {
+    idleCounter++;
+  }
+
+  // Estimate CPU usage
+  float usageEstimate = 100.0 - ((float)idleCounter / 100000.0) * 100.0;
+  if (usageEstimate < 0) usageEstimate = 0;
+  if (usageEstimate > 100) usageEstimate = 100;
+
+  int freeHeap = ESP.getFreeHeap();
+
+  // Send to ThingSpeak
+  ThingSpeak.setField(1, freeHeap);
+  ThingSpeak.setField(2, usageEstimate);
+
+  int response = ThingSpeak.writeFields(channel_number, Api_key);
+  String statusMsg = (response == 200) ? "Success" : "Failed";
+
+  // Print table header every 5 rows for readability
+  if (loopCounter % 5 == 0) {
+    printTableHeader();
+  }
+
+  // Print data row
+  Serial.printf("| %14d | %13.2f | %-11s |\n", freeHeap, usageEstimate, statusMsg.c_str());
+  Serial.println("+----------------+---------------+-------------+");
+
+  loopCounter++;
+  delay(15000);
+}
